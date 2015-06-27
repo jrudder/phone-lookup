@@ -1,0 +1,9 @@
+# virtualenv
+.env
+
+# Compiled Python
+__pycache__
+
+# Input and output data
+*.json
+*.csv
