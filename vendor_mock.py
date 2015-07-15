@@ -39,7 +39,3 @@ class MockVendor(Vendor):
     Return a unique representation for the vendor
     """
     return self.name
-
-  def self_test(self):
-    """ Nothing to test """
-    pass

@@ -13,6 +13,13 @@ log = logging.getLogger(__name__)
 
 @Vendor.register(name="PacificEast")
 class PacificEast(Vendor):
+  """
+  Development:
+    https://clientdev.pacificeast.com/Services/Custom/2514/1_0/PECustomXML.svc
+
+  Production:
+    https://secure.pacificeast.com/Services/Custom/2527/1_0/PECustomXML.svc
+  """
   
   def __init__(self, config):
     self.name = "PacificEast-{}".format("public" if config["public"] else "restricted")
@@ -67,7 +74,7 @@ class PacificEast(Vendor):
 
     return result
 
-  def __parse(self, response):
+  def _parse(self, response):
     """
     Parse the response text
 
@@ -117,57 +124,3 @@ class PacificEast(Vendor):
     Return a unique representation for the vendor
     """
     return self.name
-
-  def self_test(self):
-    """
-    Test yourself
-    """
-
-    self.test_1()
-    self.test_2()
-
-  def test_1(self):
-    xml = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-    <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-      <ReversePhoneLookupResponse xmlns="http://pacificeast.com/custom">
-        <ReversePhoneLookupResult>
-          <QueryPhone>3105551234</QueryPhone>
-          <PhoneServiceType>Unknown</PhoneServiceType>
-          <ContactsFound>0</ContactsFound>
-          </ReversePhoneLookupResult>
-        </ReversePhoneLookupResponse>
-      </s:Body>
-    </s:Envelope>"""
-    result = self.__parse(xml)
-    assert result.success == False
-
-  def test_2(self):
-    xml = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-    <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-      <ReversePhoneLookupResponse xmlns="http://pacificeast.com/custom">
-        <ReversePhoneLookupResult>
-          <QueryPhone>3105551234</QueryPhone>
-          <PhoneServiceType>Unknown</PhoneServiceType>
-          <ContactsFound>2</ContactsFound>
-          <Contacts>
-            <Contact>
-              <FirstName>Bob</FirstName>
-              <LastName>Smith</LastName>
-            </Contact>
-            <Contact>
-              <FirstName>Sally</FirstName>
-              <LastName>Jones</LastName>
-            </Contact>
-          </Contacts>          
-          </ReversePhoneLookupResult>
-        </ReversePhoneLookupResponse>
-      </s:Body>
-    </s:Envelope>"""
-    result = self.__parse(xml)
-    assert result.success == True
-    assert len(result.contacts) == 2
-    assert result.contacts[0] == {"firstname": "Bob", "lastname": "Smith"}
-    assert result.contacts[1] == {"firstname": "Sally", "lastname": "Jones"}
-
-
-  

@@ -49,10 +49,3 @@ class Vendor(ProviderBase, metaclass=ABCMeta):
     Return a unique representation for the vendor
     """
     raise NotImplementedError("Implement this method in the child class")
-
-  @abstractmethod
-  def self_test(self):
-    """
-    Test yourself
-    """
-    raise NotImplementedError("Implement this method in the child class")

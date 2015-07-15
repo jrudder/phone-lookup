@@ -8,11 +8,18 @@ This has been tested on Python 3.4.2. This should get you going:
 virtualenv -p `which python3` .env
 source .env/bin/activate
 pip install -r requirements.txt
+nosetests
 python main.py -h
 ```
 
 If all is well, you'll see something like this:
 ```
+...........
+----------------------------------------------------------------------
+Ran tests in 0.077s
+
+OK
+
 usage: main.py [-h] [--pceid PCEID] [--runall]
 
 Phone Lookup

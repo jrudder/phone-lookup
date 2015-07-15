@@ -58,10 +58,6 @@ def main():
   # Get the waterfall
   waterfall = get_waterfall(pce_id=args.pceid)
 
-  # Perform self-tests
-  for v in waterfall:
-    v.self_test()
-
   # Load the number data and perform the lookups
   numbers = load_numbers("numbers.json")
   do_lookups(numbers, waterfall, "numbers.json", runall=args.runall)
