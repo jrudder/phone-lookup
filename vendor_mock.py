@@ -30,9 +30,11 @@ class MockVendor(Vendor):
 
     return Vendor.LookupResult(
       success=True,
-      contacts=[
-        {"firstname": "Sally", "lastname": "Smith", "address": "123 Main St", "city": "Anytown", "zip": "01234"}
-      ])
+      contacts=[{
+        "firstname": "Sally", "lastname": "Smith",
+        "address": "123 Main St", "city": "Anytown", "state": "CA", "country": "USA", "zip": "01234"
+      }
+    ])
 
   def name(self):
     """

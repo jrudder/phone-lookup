@@ -53,7 +53,8 @@ class ProviderBase(metaclass=ABCMeta):
         cls.__name__,
         name))
 
-      # Return the class unchanged
+      # Return the class with _name added
+      cls2register._name = name
       return cls2register
 
     return decorator
