@@ -42,7 +42,7 @@ class GoogleGeocoder(Geocoder):
       postalCode = postalCode,
     ))
 
-    logger.info(g.data)
+    log.info(g.data)
 
     result = Geocoder.GeocodeResult(
       success=True,
