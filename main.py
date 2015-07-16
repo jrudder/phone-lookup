@@ -2,8 +2,8 @@
 """
 Run some phone numbers through some APIs, storing the results in a JSON file.
 
-Usage:
-python main.py --pceid <ACCESS ID>
+For usage, see:
+python main.py --help
 
 JSON format:
 [
@@ -16,7 +16,13 @@ JSON format:
         "address": "123 Main St",
         "city": "Anytown",
         "state": "JR",
-        "zip": 12345
+        "country": "USA",
+        "zip": 12345,
+        "geocoded": True,
+        "formatted_addr": "123 Main St, Anytown USA 12345"
+        "geo_accuracy": "ROOFTOP"
+        "latitude": 12.3456,
+        "longitude": 78.9012
       }
       ...
     ]
@@ -39,6 +45,7 @@ import signal
 from vendor import Vendor
 from vendor_mock import MockVendor
 from vendor_pacificeast import PacificEast
+from vendor_whitepages import WhitePages
 from geocode import Geocoder
 from geocode_mock import MockGeocoder
 from geocode_google import GoogleGeocoder
@@ -61,14 +68,15 @@ def main():
   # Which geocoder to use
   parser.add_argument("--geocoder", type=str, default="mock", help="Which geocoder ('mock' or 'google')")
 
-  parser.add_argument("--pceid",    type=str,            help="PacificEast Account ID/Key")
+  # Vendor params
+  parser.add_argument("--pce_id",    type=str,            help="PacificEast Account ID/Key")
+  parser.add_argument("--pce_env",   type=str,            help="PacificEast environment ('dev' or 'prod')")
+  parser.add_argument("--wp_key",    type=str,            help="WhitePages API Key")
+
   parser.add_argument("--runall",   action="store_true", help="Run all numbers without prompting")
   args = parser.parse_args()
 
-  # Get the waterfall
-  waterfall = get_waterfall(pce_id=args.pceid)
-
-  # Perform lookups
+  # Perform actions
   if not (args.lookup or args.geocode):
     log.warn("No actions specified. Use '--lookup' and/or '--geocode' to do something.")
   else:
@@ -76,16 +84,27 @@ def main():
     log.debug("Loading numbers.json")
     numbers = load_numbers("numbers.json")
 
+    ############
+    # Lookups
     if args.lookup:
       log.info("Performing lookups")
+
+      # Get the waterfall
+      waterfall = get_waterfall(
+        pce_id=args.pce_id,
+        pce_env=args.pce_env,
+        whitepages_key=args.wp_key)
+  
       do_lookups(numbers, waterfall, "numbers.json", runall=args.runall)
 
+    ############
+    # Geocoding
     if args.geocode:
       log.info("Performing geocoding")
       geocoder = Geocoder.get(args.geocoder, config={})
       do_geocoding(numbers, geocoder, "numbers.json", runall=args.runall)
 
-def get_waterfall(pce_id):
+def get_waterfall(pce_id=None, pce_env=None, whitepages_key=None):
   """
   Create the lookup waterfall
 
@@ -97,9 +116,10 @@ def get_waterfall(pce_id):
           name is the name of a Vendor provider and config is the associated configuration
   """
   waterfall = [
-    Vendor.get("mock", config={}),
-    #Vendor.get("PacificEast", config={"public": False, "account_id": pce_id}),
-    #Vendor.get("PacificEast", config={"public": True,  "account_id": pce_id}),
+    #Vendor.get("mock", config={}),
+    Vendor.get("PacificEast", config={"public": False, "account_id": pce_id, "env": pce_env}),
+    Vendor.get("PacificEast", config={"public": True,  "account_id": pce_id, "env": pce_env}),
+    Vendor.get("WhitePages",  config={"api_key": whitepages_key}),
   ]
 
   return waterfall
@@ -137,7 +157,14 @@ def do_lookups(numbers, waterfall, save_file, runall=False):
     None
   """
 
+  count = 0
+  found = 0
+  total = len(numbers)
+
   for number in numbers:
+    count += 1
+    log.debug("Lookup number {} of {} ({} hits; {} misses)".format(count, total, found, count - found))
+
     # Only lookup numbers that don't have data
     if number.get("vendor", None) is None:
       for vendor in waterfall:
@@ -154,6 +181,7 @@ def do_lookups(numbers, waterfall, save_file, runall=False):
           # Store the results on the number
           if lookup.success:
             # Success
+            found += 1
             number["vendor"]   = vendor.name
             number["contacts"] = lookup.contacts
 
@@ -162,6 +190,9 @@ def do_lookups(numbers, waterfall, save_file, runall=False):
 
           # Stop searching for this number if we got a result
           if lookup.success: break
+    else:
+      # Already found
+      found += 1
 
 def do_geocoding(numbers, geocoder, save_file, runall=False):
   """
@@ -179,7 +210,14 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
     None
   """
 
+  count = 0
+  found = 0
+  total = len(numbers)
+
   for number in numbers:
+    log.debug("Geocode number {} of {} ({} hits; {} misses)".format(count, total, found, count - found))
+    count += 1
+
     # Only geocode numbers with an address that has not been geocoded
     for contact in number.get("contacts", []):
       if contact.get("address", None) is not None and contact.get("geocoded", False) is False:
@@ -200,6 +238,7 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
         # Store the results on the contact
         if lookup.success:
           # Success
+          found += 1
           contact["formatted_addr"] = lookup.formatted
           contact["geo_accuracy"] = lookup.accuracy_str
           contact["latitude"]  = lookup.latitude
@@ -207,6 +246,9 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
 
         # Save the numbers
         write_results(numbers, save_file)
+      else:
+        # Already found
+        found += 1
 
 def write_results(numbers, filepath):
   """

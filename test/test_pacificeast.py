@@ -12,7 +12,7 @@ def test_config():
   """ Ensure that the config is properly parsed """
 
   # Create an instance of the vendor
-  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234"})
+  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234", "env": "dev"})
 
   with patch("vendor_pacificeast.requests.post") as mock_post:
     # Configure the mock object
@@ -27,13 +27,13 @@ def test_config():
 
 def test_no_result():
   """ Handle response of no contacts found """
-  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234"})
+  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234", "env": "dev"})
   lookup_result = s._parse(XML_NO_RESULT)
   assert lookup_result.success == False
 
 def test_multiple_contacts():
   """ Handle response of multiple contacts found """
-  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234"})
+  s = Vendor.get("pacificeast", config={"public": True, "account_id": "1234", "env": "dev"})
   lookup_result = s._parse(XML_MULTIPLE_CONTACTS)
   assert len(lookup_result.contacts) == 2
   assert lookup_result.contacts[0] == {"firstname": "Bob", "lastname": "Smith"}

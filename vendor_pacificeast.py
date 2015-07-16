@@ -1,5 +1,5 @@
 """
-Mock Vendor
+PacificEast Vendor
 """
 # Python
 import logging
@@ -13,18 +13,21 @@ log = logging.getLogger(__name__)
 
 @Vendor.register(name="PacificEast")
 class PacificEast(Vendor):
-  """
-  Development:
-    https://clientdev.pacificeast.com/Services/Custom/2514/1_0/PECustomXML.svc
 
-  Production:
-    https://secure.pacificeast.com/Services/Custom/2527/1_0/PECustomXML.svc
-  """
-  
   def __init__(self, config):
+    if config.get("account_id", None) is None:
+      raise ValueError("PacificEast: account_id] must not be None")
+    
     self.name = "PacificEast-{}".format("public" if config["public"] else "restricted")
     self.account_id = config["account_id"]
-    self.uri = "https://secure.pacificeast.com/Services/Custom/2527/1_0/PECustomXML.svc"
+    if config["env"] == "dev":
+      self.uri = "https://clientdev.pacificeast.com/Services/Custom/2514/1_0/PECustomXML.svc"
+    elif config["env"] == "prod":
+      self.uri = "https://secure.pacificeast.com/Services/Custom/2527/1_0/PECustomXML.svc"
+    else:
+      raise ValueError("PacificEast: env must be either 'dev' or 'prod'")
+
+
     self.public = config["public"]
 
   def lookup(self, number):
@@ -64,13 +67,11 @@ class PacificEast(Vendor):
 
     log.debug(response.status_code)
     log.debug(response.text)
-    print(response.status_code)
-    print(response.text)
 
     if( response.status_code!=200 ):
       result = Vendor.LOOKUP_FAILED
     else:
-      result = self.__parse(response.text)
+      result = self._parse(response.text)
 
     return result
 
