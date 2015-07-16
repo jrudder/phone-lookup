@@ -41,6 +41,7 @@ import argparse
 import json
 import logging
 import signal
+from time import sleep
 # * * *
 from vendor import Vendor
 from vendor_mock import MockVendor
@@ -158,12 +159,13 @@ def do_lookups(numbers, waterfall, save_file, runall=False):
   """
 
   count = 0
+  new_found = 0
   found = 0
   total = len(numbers)
 
   for number in numbers:
+    log.debug("Lookup number {} of {} ({} hits; {} misses)".format(count+1, total, found, count - found))
     count += 1
-    log.debug("Lookup number {} of {} ({} hits; {} misses)".format(count, total, found, count - found))
 
     # Only lookup numbers that don't have data
     if number.get("vendor", None) is None:
@@ -182,17 +184,22 @@ def do_lookups(numbers, waterfall, save_file, runall=False):
           if lookup.success:
             # Success
             found += 1
+            new_found += 1
             number["vendor"]   = vendor.name
             number["contacts"] = lookup.contacts
 
-          # Save the numbers
-          write_results(numbers, save_file)
+          # Save the numbers after every N new finds
+          if new_found % 10 == 0:
+            write_results(numbers, save_file)
 
           # Stop searching for this number if we got a result
           if lookup.success: break
     else:
       # Already found
       found += 1
+
+  # Be sure to write before finishing
+  write_results(numbers, save_file)
 
 def do_geocoding(numbers, geocoder, save_file, runall=False):
   """
@@ -212,15 +219,16 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
 
   count = 0
   found = 0
+  new_found = 0
   total = len(numbers)
 
   for number in numbers:
-    log.debug("Geocode number {} of {} ({} hits; {} misses)".format(count, total, found, count - found))
+    log.debug("Geocode number {} of {} ({} hits; {} misses)".format(count+1, total, found, count - found))
     count += 1
 
     # Only geocode numbers with an address that has not been geocoded
     for contact in number.get("contacts", []):
-      if contact.get("address", None) is not None and contact.get("geocoded", False) is False:
+      if contact.get("state", None) is not None and contact.get("geocoded", False) is False:
         if not runall:
           check_keep_going("Geocode", number["number"], geocoder.name)
         else:
@@ -239,6 +247,7 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
         if lookup.success:
           # Success
           found += 1
+          new_found += 1
           contact["formatted_addr"] = lookup.formatted
           contact["geo_accuracy"] = lookup.accuracy_str
           contact["latitude"]  = lookup.latitude
@@ -246,9 +255,14 @@ def do_geocoding(numbers, geocoder, save_file, runall=False):
 
         # Save the numbers
         write_results(numbers, save_file)
+        sleep(0.5)
+
       else:
         # Already found
         found += 1
+
+  # Be sure to write before finishing
+  write_results(numbers, save_file)
 
 def write_results(numbers, filepath):
   """

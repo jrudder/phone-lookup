@@ -5,6 +5,7 @@ Google Geocoder
 import logging
 # 3rd Party
 from pygeocoder import Geocoder as PyGeocoder
+from pygeocoder import GeocoderError
 # * * *
 from geocode import Geocoder
 
@@ -31,27 +32,34 @@ class GoogleGeocoder(Geocoder):
     Returns:
       GeocodeResult
     """
-    g = PyGeocoder.geocode("{address} {city} {region} {country} {postalCode}".format(
-      address = line1 if line2 is None else "{} {}".format(
-        line1,
-        line2
-      ),
-      city       = city,
-      region     = region,
-      country    = country,
-      postalCode = postalCode,
-    ))
 
-    log.info(g.data)
+    try:
+      if line1 is None:
+        address = ""
+      elif line2 is None:
+        address = line1
+      else:
+        address = "{} {}".format(line1, line2)
+      
+      g = PyGeocoder.geocode("{address} {city} {region} {country} {postalCode}".format(
+        address    = address,
+        city       = city,
+        region     = region,
+        country    = country,
+        postalCode = postalCode,
+      ))
 
-    result = Geocoder.GeocodeResult(
-      success=True,
-      formatted=g.formatted_address,
-      accuracy_str=g.location_type,
-      latitude=g.latitude,
-      longitude=g.longitude)
+      log.info(g.data)
 
-    #except:
-    #  result = Geocoder.GEOCODE_FAILED
+      result = Geocoder.GeocodeResult(
+        success=True,
+        formatted=g.formatted_address,
+        accuracy_str=g.location_type,
+        latitude=g.latitude,
+        longitude=g.longitude)
+
+    except GeocoderError:
+      log.error("Failed to geocode", exc_info=True)
+      result = Geocoder.GEOCODE_FAILED
    
     return result

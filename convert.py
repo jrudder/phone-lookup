@@ -7,19 +7,21 @@ Convert the JSON to CSV
 import csv
 import json
 
+FILENAME = "numbers5"
+
 def main():
   """
   Do it
   """
 
-  numbers = load_json("numbers.json")
-  write_csv("numbers.csv", numbers)
+  numbers = load_json("{}.json".format(FILENAME))
+  write_csv("{}.csv".format(FILENAME), numbers)
 
 def load_json(path):
   """
   Load the numbers JSON from path
   """
-  with open("numbers.json") as f:
+  with open("{}.json".format(FILENAME)) as f:
     numbers = json.load(f)
 
   return numbers
@@ -30,7 +32,7 @@ def write_csv(path, numbers):
   """
   with open(path, "w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerow(["number", "name", "address", "city", "state", "zip"])
+    writer.writerow(["number", "firstname", "lastname", "address", "city", "state", "zip", "latitude", "longitude", "vendor", "restricted"])
     for n in numbers:
       if len(n.get("contacts", [])) == 0:
         writer.writerow([n["number"]])
@@ -43,7 +45,11 @@ def write_csv(path, numbers):
               c.get("address", ""),
               c.get("city", ""),
               c.get("state", ""),
-              c.get("zip", "")])
+              c.get("zip", ""),
+              c.get("latitude", ""),
+              c.get("longitude", ""),
+              n.get("vendor", "-").split("-")[0],
+              "Y" if "restricted" in n.get("vendor", "") else "N"])
 
 if __name__ == "__main__":
   # Do it.
