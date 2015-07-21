@@ -30,6 +30,12 @@ class Vendor(ProviderBase, metaclass=ABCMeta):
   ])
   LOOKUP_FAILED = LookupResult(success=False, contacts=None)
 
+  LookdownResult  = namedtuple("LookdownResult", [
+    "success",          # bool: True if the lookup was successful
+    "contacts",         # array of contacts with name and address
+  ])
+  LOOKDOWN_FAILED = LookdownResult(success=False, contacts=None)
+
   @abstractmethod
   def lookup(self, number):
     """
@@ -40,6 +46,23 @@ class Vendor(ProviderBase, metaclass=ABCMeta):
 
     Returns:
       LookupResult
+    """
+    raise NotImplementedError("Implement this method in the child class")
+
+  @abstractmethod
+  def lookdown(self, address, city, state, postalCode, country):
+    """
+    Perform a lookup of name and address to phone
+
+    Args:
+      address (str): line1 and line2 of the address to lookup
+      city (str): city of the address to lookup
+      state (str): state of the address to lookup
+      postalCode (str): five- or nine-digit postal code of the address to lookup
+      country (str): two-character ISO country code
+
+    Returns:
+      LookdownResult
     """
     raise NotImplementedError("Implement this method in the child class")
 

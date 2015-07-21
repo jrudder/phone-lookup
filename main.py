@@ -50,6 +50,7 @@ from vendor_whitepages import WhitePages
 from geocode import Geocoder
 from geocode_mock import MockGeocoder
 from geocode_google import GoogleGeocoder
+import server
 
 log = logging.getLogger(__name__)
 
@@ -63,8 +64,9 @@ def main():
   # Parse the command line args
   parser = argparse.ArgumentParser(description="Phone Lookup")
   # What to do
-  parser.add_argument("--lookup",   action="store_true", help="Perform phone lookup?")
-  parser.add_argument("--geocode",  action="store_true", help="Perform geocoding?")
+  parser.add_argument("--lookup",   action="store_true", help="Perform phone lookup")
+  parser.add_argument("--geocode",  action="store_true", help="Perform geocoding")
+  parser.add_argument("--server",   action="store_true", help="Perform reverse address serving")
 
   # Which geocoder to use
   parser.add_argument("--geocoder", type=str, default="mock", help="Which geocoder ('mock' or 'google')")
@@ -78,8 +80,27 @@ def main():
   args = parser.parse_args()
 
   # Perform actions
-  if not (args.lookup or args.geocode):
-    log.warn("No actions specified. Use '--lookup' and/or '--geocode' to do something.")
+  if not (args.lookup or args.geocode or args.server):
+    log.warn("No actions specified. Use '--lookup' and/or '--geocode' or '--server' to do something.")
+  elif args.server and (args.lookup or args.geocode):
+    log.warn("Cannot use '--server' with '--lookup' or '--geocode'.")
+  elif args.server:
+    # Use normal SIGINT handling
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    # Run the server
+    if args.pce_id:
+      vendors = [
+        Vendor.get("PacificEast", config={"public": False, "account_id": args.pce_id, "env": args.pce_env}),
+      ]
+    else:
+      vendors = [
+        Vendor.get("mock", config={}),
+      ]
+
+    # Configure and run the Pyramid app
+    server.serve(vendors)
+    
   else:
     # Load the number data and perform the lookups
     log.debug("Loading numbers.json")

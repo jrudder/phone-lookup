@@ -38,6 +38,20 @@ class WhitePages(Vendor):
 
     return result
     
+  def lookdown(self, name, addr):
+    """
+    Perform a lookup of a name and address
+
+    Args:
+      name (str): name to lookup
+      addr (str): addr to lookup
+
+    Returns:
+      LookdownResult
+    """
+
+    raise NotImplementedError("WhitePages plugin cannot perform lookdown()")
+
   def _parse(self, response):
     """
     Parse the response text

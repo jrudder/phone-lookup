@@ -38,6 +38,11 @@ def write_csv(path, numbers):
         writer.writerow([n["number"]])
       else:
         for c in n["contacts"]:
+          zipcode = c.get("zip", "")
+          if zipcode is None: zipcode = ""
+          if len(zipcode) > 5:
+            zipcode = "{}-{}".format(zipcode[:5], zipcode[5:])
+
           writer.writerow([
               n["number"],
               c.get("firstname", ""),
@@ -45,7 +50,7 @@ def write_csv(path, numbers):
               c.get("address", ""),
               c.get("city", ""),
               c.get("state", ""),
-              c.get("zip", ""),
+              zipcode,
               c.get("latitude", ""),
               c.get("longitude", ""),
               n.get("vendor", "-").split("-")[0],
