@@ -68,6 +68,10 @@ def main():
   parser.add_argument("--geocode",  action="store_true", help="Perform geocoding")
   parser.add_argument("--server",   action="store_true", help="Perform reverse address serving")
 
+  # Server params
+  parser.add_argument("--server_sid",   type=str, help="sid for server")
+  parser.add_argument("--server_token", type=str, help="token for server")
+
   # Which geocoder to use
   parser.add_argument("--geocoder", type=str, default="mock", help="Which geocoder ('mock' or 'google')")
 
@@ -99,7 +103,7 @@ def main():
       ]
 
     # Configure and run the Pyramid app
-    server.serve(vendors)
+    server.serve(vendors, sid=args.server_sid, token=args.server_token)
     
   else:
     # Load the number data and perform the lookups

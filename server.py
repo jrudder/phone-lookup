@@ -123,6 +123,9 @@ def _parse_request(request):
   Parse the request
   """
 
+  global SID
+  global TOKEN
+  
   try:
     sid        = request.params["sid"]
     token      = request.params["token"]
@@ -141,6 +144,9 @@ def _parse_request(request):
       "postalCode": postalCode,
       "country": country,
     }
+
+    if not (sid==SID and token==TOKEN):
+      raise HTTPUnauthorized('{"status":"unauthorized"}')
 
   except KeyError as exc:
     raise HTTPBadRequest('{{"missing":"{}"}}'.format(exc.args[0]))
@@ -161,13 +167,16 @@ def _lookdown(vendors, address, city, state, postalCode, country):
 
   return result
 
-def serve(vendors, sid="1234", token="5678"):
+def serve(vendors, sid=None, token=None):
   global VENDORS
   global SID
   global TOKEN
   VENDORS = vendors
+
+  if sid is None: sid = "1234"
+  if token is None: token = "5678"
   SID = sid
-  TOKEN = token 
+  TOKEN = token
   
   # Configure and run the Pyramid app
   config = Configurator()
