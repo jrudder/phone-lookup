@@ -212,15 +212,17 @@ class PacificEast(Vendor):
 
         # Create a contact for each listing
         contact = {}
-        self._grab_xml_entry(contact, "firstname", e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}FirstName")
-        self._grab_xml_entry(contact, "lastname",  e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}LastName")
-        self._grab_xml_entry(contact, "address",   e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Address")
-        self._grab_xml_entry(contact, "city",      e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}City")
-        self._grab_xml_entry(contact, "state",     e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}State")
-        self._grab_xml_entry(contact, "country",   e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Country")
-        self._grab_xml_entry(contact, "carrier",   e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Carrier")
-        self._grab_xml_entry(contact, "phone",     e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Phone")
-        self._grab_xml_entry(contact, "linetype",  e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}PhoneServiceType")
+        self._grab_xml_entry(contact, "firstname",  e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}FirstName")
+        self._grab_xml_entry(contact, "lastname",   e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}LastName")
+        self._grab_xml_entry(contact, "address",    e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Address")
+        self._grab_xml_entry(contact, "city",       e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}City")
+        self._grab_xml_entry(contact, "state",      e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}State")
+        self._grab_xml_entry(contact, "country",    e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Country")
+        self._grab_xml_entry(contact, "carrier",    e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Carrier")
+        self._grab_xml_entry(contact, "phone",      e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}Phone")
+        self._grab_xml_entry(contact, "linetype",   e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}PhoneServiceType")
+        self._grab_xml_entry(contact, "restricted", e, "{http://schemas.datacontract.org/2004/07/PE.RealTime.FlexiQuery}RestrictedData")
+        if "restricted" in contact: contact["restricted"] = True if contact["restricted"].lower()=="true" else False
         if "linetype" in contact: contact["linetype"] = contact["linetype"].lower()
         contacts.append(contact)
 

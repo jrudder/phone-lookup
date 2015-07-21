@@ -13,9 +13,16 @@ def test_parser():
   """ Ensure that the request parser works """
 
   request = DummyRequest()
-  request.params = {"token": "123", "name": "bob smith", "addr": "123 Main St"}
+  request.params = {
+    "sid": "123",
+    "token": "456",
+    "address": "123 Main St",
+    "city": "Anytown",
+    "state": "NY",
+    "country": "US",
+    "postalCode": "12345"}
 
-  auth, name, addr = server._parse_request(request)
-  assert auth == "123"
-  assert name == "bob smith"
-  assert addr == "123 Main St"
+  req = server._parse_request(request)
+  assert req["sid"] == "123"
+  assert req["token"] == "456"
+  assert req["address"] == "123 Main St"

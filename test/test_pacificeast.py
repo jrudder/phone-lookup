@@ -90,6 +90,7 @@ XML_RAD_NO_RESULTS = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/env
 
 XML_RAD_RESULTS = [
   {
+    "restricted": False,
     "firstname": "Sally",
     "lastname": "Smith",
     "carrier": "AT&T",
@@ -100,6 +101,7 @@ XML_RAD_RESULTS = [
     "state": "NY",
     "country": "US"},
   {
+    "restricted": False,
     "firstname": "Jane",
     "lastname": "Smith",
     "carrier": "AT&T",
@@ -110,6 +112,7 @@ XML_RAD_RESULTS = [
     "state": "NY",
     "country": "US"},
   {
+    "restricted": True,
     "firstname": "Susan",
     "lastname": "Smith",
     "carrier": "AT&T",
@@ -191,7 +194,7 @@ XML_RAD_RESULT = """<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelop
                      <a:PhoneServiceType>Landline</a:PhoneServiceType>
                      <a:Ported>N</a:Ported>
                      <a:Postal>123459876</a:Postal>
-                     <a:RestrictedData>false</a:RestrictedData>
+                     <a:RestrictedData>true</a:RestrictedData>
                      <a:State>NY</a:State>
                      <a:TransactionDate>20150601</a:TransactionDate>
                   </a:Listing>

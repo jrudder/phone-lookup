@@ -86,6 +86,8 @@ from vendor_mock import MockVendor
 log = logging.getLogger(__name__)
 
 VENDORS = []
+SID = "123"
+TOKEN = "456"
 
 def api(request):
   try:
