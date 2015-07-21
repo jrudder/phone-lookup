@@ -161,9 +161,13 @@ def _lookdown(vendors, address, city, state, postalCode, country):
 
   return result
 
-def serve(vendors):
+def serve(vendors, sid="1234", token="5678"):
   global VENDORS
+  global SID
+  global TOKEN
   VENDORS = vendors
+  SID = sid
+  TOKEN = token 
   
   # Configure and run the Pyramid app
   config = Configurator()
